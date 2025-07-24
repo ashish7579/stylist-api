@@ -1,7 +1,12 @@
 from flask import Flask, request, jsonify
 from stylist_core import generate_styling_for_product, generate_product_for_styling
+import os
 
 app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Stylist API is running."
 
 @app.route('/product-to-style', methods=['POST'])
 def product_to_style():
@@ -21,21 +26,6 @@ def style_to_product():
     result = generate_product_for_styling(style_context)
     return jsonify({'result': result})
 
-# ✅ Make it Replit-friendly by listening on 0.0.0.0:8000
-import os
-
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))  # default to 5000 if PORT is not set
+    port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
-
-
-from flask import Flask
-
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "Stylist API is running."
-
-# Your existing code below
-
