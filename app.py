@@ -1,8 +1,12 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from stylist_core import generate_styling_for_product, generate_product_for_styling
 import os
 
 app = Flask(__name__)
+CORS(app)  # ✅ Enable CORS for all domains
+
+# Your endpoints follow here...
 
 @app.route('/')
 def home():
