@@ -24,3 +24,14 @@ def style_to_product():
 # ✅ Make it Replit-friendly by listening on 0.0.0.0:8000
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
+
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Stylist API is running."
+
+# Your existing code below
+
