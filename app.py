@@ -1,6 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from stylist_core import generate_styling_for_product, generate_product_for_styling
+from stylist_core import (
+    generate_styling_for_product,
+    generate_product_for_styling,
+    get_product_data
+)
 import os
 
 app = Flask(__name__)
@@ -18,7 +22,13 @@ def product_to_style():
         if not product_id:
             return jsonify({'error': 'Product ID is required'}), 400
 
-        result = generate_styling_for_product(product_id)
+        # ✅ Fetch product data from catalog
+        product_data = get_product_data(product_id)
+        if not product_data:
+            return jsonify({'error': 'Product not found in catalog'}), 400
+
+        # ✅ Generate styling suggestion
+        result = generate_styling_for_product(product_data)
         return jsonify({'result': result})
 
     except Exception as e:
