@@ -1,9 +1,32 @@
 # stylist_core.py
 
 import os
+import pandas as pd
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
 import google.generativeai as genai
 
+# Load .env file
+load_dotenv()
+
+# Configure Gemini API Key
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+# Cache setup
+catalog_cache = {
+    "data": None,
+    "last_updated": None
+}
+
+def fetch_catalog():
+    sheet_csv_url = "https://docs.google.com/spreadsheets/d/1sJ_w4BkJha3SN4H6Eo-Fr-WqyytmryDU4sBOZeUwmHM/export?format=csv"
+
+    # Refresh every 60 minutes
+    if catalog_cache["data"] is None or datetime.now() - catalog_cache["last_updated"] > timedelta(minutes=60):
+        catalog_cache["data"] = pd.read_csv(sheet_csv_url)
+        catalog_cache["last_updated"] = datetime.now()
+
+    return catalog_cache["data"]
 
 def generate_styling_for_product(product_data):
     prompt = f"""
@@ -45,3 +68,14 @@ def generate_product_for_styling(styling_context):
     model = genai.GenerativeModel('gemini-pro')
     response = model.generate_content(prompt)
     return response.text
+
+def get_product_data(product_id):
+    catalog = fetch_catalog()
+    row = catalog[catalog["Product ID"] == product_id.upper()]
+    if row.empty:
+        return None
+    return {
+        "category": row.iloc[0]["Category"],
+        "metal_color": row.iloc[0]["Metal Color"],
+        "stone_color": row.iloc[0]["Stone/Enamel Color"]
+    }
