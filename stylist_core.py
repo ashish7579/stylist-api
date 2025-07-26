@@ -4,16 +4,12 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import google.generativeai as genai
 
-# Load .env file
 load_dotenv()
 
-# Configure Gemini API Key
+# Setup API Key
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Optional: List models for debugging (remove in production)
-# print(genai.list_models())
-
-# Cache setup
+# Catalog cache system
 catalog_cache = {
     "data": None,
     "last_updated": None
@@ -21,54 +17,10 @@ catalog_cache = {
 
 def fetch_catalog():
     sheet_csv_url = "https://docs.google.com/spreadsheets/d/1sJ_w4BkJha3SN4H6Eo-Fr-WqyytmryDU4sBOZeUwmHM/export?format=csv"
-
-    # Refresh every 60 minutes
     if catalog_cache["data"] is None or datetime.now() - catalog_cache["last_updated"] > timedelta(minutes=60):
         catalog_cache["data"] = pd.read_csv(sheet_csv_url)
         catalog_cache["last_updated"] = datetime.now()
-
     return catalog_cache["data"]
-
-def generate_styling_for_product(product_data):
-    prompt = f"""
-    You are an expert fashion stylist. Based on the following product details, suggest suitable styling contexts:
-
-    Product Details:
-    - Category: {product_data.get('category')}
-    - Metal Color: {product_data.get('metal_color')}
-    - Stone/Enamel Color: {product_data.get('stone_color')}
-
-    Respond in this format:
-    Occasion:
-    Mood:
-    Outfit Type:
-    Neckline:
-    Hairstyle:
-    """
-    model = genai.GenerativeModel('gemini-pro')
-    response = model.generate_content(prompt)
-    return response.text
-
-def generate_product_for_styling(styling_context):
-    prompt = f"""
-    You are a jewellery stylist bot. Based on the following styling context, suggest jewellery product recommendations and categories.
-
-    Styling Context:
-    - Occasion: {styling_context.get('occasion')}
-    - Mood: {styling_context.get('mood')}
-    - Outfit Type: {styling_context.get('outfit')}
-    - Neckline: {styling_context.get('neckline')}
-    - Hairstyle: {styling_context.get('hairstyle')}
-
-    Respond in this format:
-    - Suggested Category:
-    - Metal Color:
-    - Stone/Enamel Color:
-    - Suggested Description:
-    """
-    model = genai.GenerativeModel('gemini-pro')
-    response = model.generate_content(prompt)
-    return response.text
 
 def get_product_data(product_id):
     catalog = fetch_catalog()
@@ -80,3 +32,40 @@ def get_product_data(product_id):
         "metal_color": row.iloc[0]["Metal Color"],
         "stone_color": row.iloc[0]["Stone/Enamel Color"]
     }
+
+def generate_styling_for_product(product_data):
+    prompt = f"""
+You are a professional jewellery stylist. Based on the product below, suggest:
+- Occasion
+- Mood
+- Outfit Type
+- Neckline
+- Hairstyle
+
+Product:
+Category: {product_data.get('category')}
+Metal Color: {product_data.get('metal_color')}
+Stone/Enamel Color: {product_data.get('stone_color')}
+"""
+    model = genai.GenerativeModel("gemini-pro")
+    response = model.generate_content(prompt)
+    return response.text
+
+def generate_product_for_styling(styling_context):
+    prompt = f"""
+Based on this style context, suggest:
+- Jewellery Category
+- Metal Color
+- Stone/Enamel Color
+- Product Description
+
+Style:
+Occasion: {styling_context.get('occasion')}
+Mood: {styling_context.get('mood')}
+Outfit: {styling_context.get('outfit')}
+Neckline: {styling_context.get('neckline')}
+Hairstyle: {styling_context.get('hairstyle')}
+"""
+    model = genai.GenerativeModel("gemini-pro")
+    response = model.generate_content(prompt)
+    return response.text
