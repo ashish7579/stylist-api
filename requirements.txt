@@ -3,5 +3,5 @@ openai==1.6.1
 pandas==1.5.3
 numpy==1.23.5
 python-dotenv
-google-generativeai==0.5.0
+google-generativeai==0.5.2
 flask_cors
