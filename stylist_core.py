@@ -1,8 +1,3 @@
-# stylist_core.py
-import google.generativeai as genai
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-print(genai.list_models())
-
 import os
 import pandas as pd
 from datetime import datetime, timedelta
@@ -14,6 +9,9 @@ load_dotenv()
 
 # Configure Gemini API Key
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+# Optional: List models for debugging (remove in production)
+# print(genai.list_models())
 
 # Cache setup
 catalog_cache = {
